@@ -1,0 +1,17 @@
+<resources>
+
+	<string name="file_browser_provide_filename">Provide Filename</string>
+	<string name="file_browser_no_fs_permission">Please enable Storage access in Settings.</string>
+	<string name="file_browser_fs_permission_rationale">Storage permission required for accessing files on device.</string>
+	<string name="file_browser_renew_storage_permission">Renew Storage Permission</string>
+	<string name="file_browser_io_error">I/O Error</string>
+	<string name="file_browser_unknown_error">Unknown error</string>
+	<string name="file_browser_overwrite_confirmation_title">Overwrite Confirmation</string>
+	<string name="file_browser_overwrite_confirmation_dialog_content">Overwrite %1$s?</string>
+	<string name="file_browseer_storage_not_mounted">Storage not mounted</string>
+	<string name="save">Save</string>
+	<string name="home">Home</string>
+	<string name="file_browser_create_folder">Create Folder</string>
+	<string name="new_folder_name">New Folder Name</string>
+
+</resources>

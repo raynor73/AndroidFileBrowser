@@ -1,11 +1,10 @@
 package org.ilapin.common.android.filebrowser.viewmodel;
 
+import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Log;
-
-import org.ilapin.common.android.viewmodelprovider.ViewModel;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,7 +17,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
 
-public class FileBrowserViewModel implements ViewModel {
+public class FileBrowserViewModel extends ViewModel {
 
 	static final String CURRENT_DIR_PATH_KEY = "CURRENT_DIR_PATH";
 

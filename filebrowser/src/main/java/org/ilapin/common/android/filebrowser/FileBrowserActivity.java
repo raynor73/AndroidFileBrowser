@@ -1,6 +1,7 @@
 package org.ilapin.common.android.filebrowser;
 
 import android.Manifest;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -32,7 +34,6 @@ import android.widget.Toast;
 import org.ilapin.common.android.filebrowser.viewmodel.FileBrowserViewModel;
 import org.ilapin.common.android.filebrowser.viewmodel.FsItem;
 import org.ilapin.common.android.filebrowser.viewmodel.PermissionsProvider;
-import org.ilapin.common.android.viewmodelprovider.ViewModelProviderActivity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
 
-public class FileBrowserActivity extends ViewModelProviderActivity implements CreateDirectoryDialog.Listener,
+public class FileBrowserActivity extends AppCompatActivity implements CreateDirectoryDialog.Listener,
 		PermissionsProvider, OverwriteConfirmationDialog.Listener {
 
 	public static final String PATH_KEY = "org.ilapin.common.android.filebrowser.FileBrowserActivity.PATH";
@@ -112,15 +113,7 @@ public class FileBrowserActivity extends ViewModelProviderActivity implements Cr
 			mFilenameEditText.setText(filename);
 		}
 
-		mViewModel = findViewModel(FileBrowserViewModel.class);
-		if (mViewModel == null) {
-			if (!TextUtils.isEmpty(preferredDirPath)) {
-				mViewModel = new FileBrowserViewModel(this, this, preferredDirPath);
-			} else {
-				mViewModel = new FileBrowserViewModel(this, this);
-			}
-			putViewModel(mViewModel);
-		}
+		mViewModel = ViewModelProviders.of(this).get(FileBrowserViewModel.class);
 
 		mFilesListAdapter = new FilesListAdapter();
 
