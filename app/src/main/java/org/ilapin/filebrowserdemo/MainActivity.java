@@ -40,8 +40,11 @@ public class MainActivity extends AppCompatActivity {
 
 	@Override
 	protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-		final File file = new File(data.getStringExtra(FileBrowserActivity.PATH_KEY));
+		if (resultCode != RESULT_OK) {
+			return;
+		}
 
+		final File file = new File(data.getStringExtra(FileBrowserActivity.PATH_KEY));
 		switch (requestCode) {
 			case OPEN_FILE_REQUEST_CODE:
 				Toast.makeText(this, "Open file: " + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
