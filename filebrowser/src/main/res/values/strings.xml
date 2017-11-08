@@ -8,10 +8,10 @@
 	<string name="file_browser_unknown_error">Unknown error</string>
 	<string name="file_browser_overwrite_confirmation_title">Overwrite Confirmation</string>
 	<string name="file_browser_overwrite_confirmation_dialog_content">Overwrite %1$s?</string>
-	<string name="file_browseer_storage_not_mounted">Storage not mounted</string>
-	<string name="save">Save</string>
-	<string name="home">Home</string>
+	<string name="file_browser_storage_not_mounted">Storage not mounted</string>
+	<string name="file_browser_save">Save</string>
+	<string name="file_browser_home">Home</string>
 	<string name="file_browser_create_folder">Create Folder</string>
-	<string name="new_folder_name">New Folder Name</string>
+	<string name="file_browser_new_folder_name">New Folder Name</string>
 
 </resources>

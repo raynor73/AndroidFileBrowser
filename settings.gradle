@@ -1,1 +1,1 @@
-include ':app', ':filebrowser'
+include ':filebrowser', ':app'

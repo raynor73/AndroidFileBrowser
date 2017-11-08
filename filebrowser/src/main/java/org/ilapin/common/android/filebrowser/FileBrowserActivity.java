@@ -1,11 +1,8 @@
 package org.ilapin.common.android.filebrowser;
 
 import android.Manifest;
-import android.arch.lifecycle.ViewModelProviders;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.arch.lifecycle.*;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -19,32 +16,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import org.ilapin.common.android.filebrowser.viewmodel.FileBrowserViewModel;
-import org.ilapin.common.android.filebrowser.viewmodel.FsItem;
-import org.ilapin.common.android.filebrowser.viewmodel.PermissionsProvider;
+import android.view.*;
+import android.widget.*;
+import io.reactivex.disposables.CompositeDisposable;
+import org.ilapin.common.android.filebrowser.viewmodel.*;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import io.reactivex.disposables.CompositeDisposable;
+import java.util.*;
 
 public class FileBrowserActivity extends AppCompatActivity implements CreateDirectoryDialog.Listener,
 		PermissionsProvider, OverwriteConfirmationDialog.Listener {
@@ -67,20 +45,13 @@ public class FileBrowserActivity extends AppCompatActivity implements CreateDire
 	public static final int MODE_OPEN = 0;
 	public static final int MODE_SAVE = 1;
 
-	@BindView(R.id.fsItemsList)
-	RecyclerView mFilesListRecyclerView;
-	@BindView(R.id.filename)
-	EditText mFilenameEditText;
-	@BindView(R.id.saveButton)
-	Button mSaveButton;
-	@BindView(R.id.progressBar)
-	ProgressBar mProgressBar;
-	@BindView(R.id.requestPermissionButton)
-	Button mRequestPermissionButton;
-	@BindView(R.id.errorMessage)
-	TextView mErrorMessageTextView;
-	@BindView(R.id.fsPermissionRationaleMessage)
-	TextView mFsPermissionRationaleMessageTextView;
+	private RecyclerView mFilesListRecyclerView;
+	private EditText mFilenameEditText;
+	private Button mSaveButton;
+	private ProgressBar mProgressBar;
+	private Button mRequestPermissionButton;
+	private TextView mErrorMessageTextView;
+	private TextView mFsPermissionRationaleMessageTextView;
 
 	private int mMode;
 
@@ -103,7 +74,13 @@ public class FileBrowserActivity extends AppCompatActivity implements CreateDire
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_file_browser);
 
-		ButterKnife.bind(this);
+		mFilesListRecyclerView = findViewById(R.id.fsItemsList);
+		mFilenameEditText = findViewById(R.id.filename);
+		mSaveButton = findViewById(R.id.saveButton);
+		mProgressBar = findViewById(R.id.progressBar);
+		mRequestPermissionButton = findViewById(R.id.requestPermissionButton);
+		mErrorMessageTextView = findViewById(R.id.errorMessage);
+		mFsPermissionRationaleMessageTextView = findViewById(R.id.fsPermissionRationaleMessage);
 
 		final String preferredDirPath = getIntent().getStringExtra(DIR_PATH_KEY);
 		final String filename = getIntent().getStringExtra(FILENAME_KEY);
@@ -113,7 +90,25 @@ public class FileBrowserActivity extends AppCompatActivity implements CreateDire
 			mFilenameEditText.setText(filename);
 		}
 
-		mViewModel = ViewModelProviders.of(this).get(FileBrowserViewModel.class);
+		mViewModel = ViewModelProviders.of(this, new ViewModelProvider.Factory() {
+
+			@NonNull
+			@Override
+			public <T extends ViewModel> T create(@NonNull final Class<T> modelClass) {
+				if (modelClass == FileBrowserViewModel.class) {
+					if (!TextUtils.isEmpty(preferredDirPath)) {
+						//noinspection unchecked
+						return (T) new FileBrowserViewModel(FileBrowserActivity.this, FileBrowserActivity.this,
+								preferredDirPath);
+					} else {
+						//noinspection unchecked
+						return (T) new FileBrowserViewModel(FileBrowserActivity.this, FileBrowserActivity.this);
+					}
+				} else {
+					throw new RuntimeException("Unknown view-model class: " + modelClass.getSimpleName());
+				}
+			}
+		}).get(FileBrowserViewModel.class);
 
 		mFilesListAdapter = new FilesListAdapter();
 
@@ -124,6 +119,26 @@ public class FileBrowserActivity extends AppCompatActivity implements CreateDire
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
+
+		findViewById(R.id.saveButton).setOnClickListener(v -> {
+			final Editable filenameEditable = mFilenameEditText.getText();
+			if (filenameEditable != null && !TextUtils.isEmpty(filenameEditable.toString())) {
+				final String path = mCurrentDirPath + File.separator + filenameEditable.toString();
+				mViewModel.isFileExists(path).subscribe(isFileExists -> {
+					if (isFileExists) {
+						OverwriteConfirmationDialog
+								.newInstance(path)
+								.show(getSupportFragmentManager(), OVERWRITE_CONFIRMATION_DIALOG_TAG);
+					} else {
+						finishWithResult(path);
+					}
+				});
+			} else {
+				mFilenameEditText.setError(getString(R.string.file_browser_provide_filename));
+			}
+		});
+
+		findViewById(R.id.requestPermissionButton).setOnClickListener(v -> requestFsPermission());
 	}
 
 	@Override
@@ -188,7 +203,7 @@ public class FileBrowserActivity extends AppCompatActivity implements CreateDire
 				case STORAGE_NOT_MOUNTED:
 					mProgressBar.setVisibility(View.GONE);
 					mSaveButton.setEnabled(true);
-					mErrorMessageTextView.setText(R.string.file_browseer_storage_not_mounted);
+					mErrorMessageTextView.setText(R.string.file_browser_storage_not_mounted);
 					mErrorMessageTextView.setVisibility(View.VISIBLE);
 					mFsPermissionRationaleMessageTextView.setVisibility(View.GONE);
 					mRequestPermissionButton.setVisibility(View.GONE);
@@ -257,48 +272,18 @@ public class FileBrowserActivity extends AppCompatActivity implements CreateDire
 
 	@Override
 	public boolean onOptionsItemSelected(final MenuItem item) {
-		switch (item.getItemId()) {
-			case android.R.id.home:
-				finish();
-				break;
-
-			case R.id.home_menu_item:
-				mViewModel.goHome();
-				break;
-
-			case R.id.create_dir_menu_item:
-				new CreateDirectoryDialog().show(getSupportFragmentManager(), "CreateDirectoryDialog");
-				break;
-
-			default:
-				return super.onOptionsItemSelected(item);
+		final int itemId = item.getItemId();
+		if (itemId == android.R.id.home) {
+			finish();
+		} else if (itemId == R.id.home_menu_item) {
+			mViewModel.goHome();
+		} else if (itemId == R.id.create_dir_menu_item) {
+			new CreateDirectoryDialog().show(getSupportFragmentManager(), "CreateDirectoryDialog");
+		} else {
+			return super.onOptionsItemSelected(item);
 		}
 
 		return true;
-	}
-
-	@OnClick(R.id.saveButton)
-	public void onSaveButtonClicked() {
-		final Editable filenameEditable = mFilenameEditText.getText();
-		if (filenameEditable != null && !TextUtils.isEmpty(filenameEditable.toString())) {
-			final String path = mCurrentDirPath + File.separator + filenameEditable.toString();
-			mViewModel.isFileExists(path).subscribe(isFileExists -> {
-				if (isFileExists) {
-					OverwriteConfirmationDialog
-							.newInstance(path)
-							.show(getSupportFragmentManager(), OVERWRITE_CONFIRMATION_DIALOG_TAG);
-				} else {
-					finishWithResult(path);
-				}
-			});
-		} else {
-			mFilenameEditText.setError(getString(R.string.file_browser_provide_filename));
-		}
-	}
-
-	@OnClick(R.id.requestPermissionButton)
-	public void onClick() {
-		requestFsPermission();
 	}
 
 	public void onFsItemClicked(final FsItem fsItem) {
@@ -455,18 +440,18 @@ public class FileBrowserActivity extends AppCompatActivity implements CreateDire
 
 		public class ViewHolder extends RecyclerView.ViewHolder {
 
-			@BindView(R.id.fsItemIcon)
-			ImageView fsItemIconImageView;
-			@BindView(R.id.filename)
-			TextView filenameTextView;
-			@BindView(R.id.size)
-			TextView sizeTextView;
-			@BindView(R.id.lastModified)
-			TextView lastModifiedTextView;
+			public final ImageView fsItemIconImageView;
+			public final TextView filenameTextView;
+			public final TextView sizeTextView;
+			public final TextView lastModifiedTextView;
 
 			public ViewHolder(final View itemView) {
 				super(itemView);
-				ButterKnife.bind(this, itemView);
+
+				fsItemIconImageView = itemView.findViewById(R.id.fsItemIcon);
+				filenameTextView = itemView.findViewById(R.id.filename);
+				sizeTextView = itemView.findViewById(R.id.size);
+				lastModifiedTextView = itemView.findViewById(R.id.lastModified);
 
 				itemView.setOnClickListener(view -> onFsItemClicked(mFsItemsList.get(getAdapterPosition())));
 			}

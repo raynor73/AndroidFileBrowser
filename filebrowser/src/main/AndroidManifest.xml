@@ -1,9 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-		  package="org.ilapin.common.android.filebrowser">
+		package="org.ilapin.common.android.filebrowser">
+
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 	<application>
+
 		<activity android:name=".FileBrowserActivity" />
+
 	</application>
 
 </manifest>

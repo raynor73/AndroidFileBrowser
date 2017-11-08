@@ -1,3 +1,5 @@
 <resources>
-	<string name="app_name">Android File Browser</string>
+	<string name="app_name">Android File Browser Demo</string>
+	<string name="open">Open</string>
+	<string name="save">Save</string>
 </resources>

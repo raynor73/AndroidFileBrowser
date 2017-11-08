@@ -8,16 +8,11 @@ import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.widget.EditText;
-
 import com.afollestad.materialdialogs.MaterialDialog;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class CreateDirectoryDialog extends DialogFragment {
 
-	@BindView(R.id.directoryName)
-	EditText mDirectoryNameEditText;
+	private EditText mDirectoryNameEditText;
 
 	private Listener mListener;
 
@@ -49,9 +44,7 @@ public class CreateDirectoryDialog extends DialogFragment {
 				}));
 
 		final MaterialDialog dialog = builder.build();
-
-		ButterKnife.bind(this, dialog.getCustomView());
-
+		mDirectoryNameEditText = dialog.getContentView().findViewById(R.id.directoryName);
 		return dialog;
 	}
 

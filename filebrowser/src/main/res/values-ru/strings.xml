@@ -1,0 +1,17 @@
+<resources>
+
+	<string name="file_browser_save">Сохранить</string>
+	<string name="file_browser_home">Домой</string>
+	<string name="file_browser_create_folder">Создать папку</string>
+	<string name="file_browser_new_folder_name">Имя папки</string>
+	<string name="file_browser_provide_filename">Укажите имя файла</string>
+	<string name="file_browser_no_fs_permission">Пожалуйста, включите доступ к Хранилищу в Настройках.</string>
+	<string name="file_browser_fs_permission_rationale">Доступ к Хранилищу необходим для загрузки и сохранения файлов.</string>
+	<string name="file_browser_renew_storage_permission">Разрешить доступ к Хранилищу</string>
+	<string name="file_browser_io_error">Ошибка чтения/записи</string>
+	<string name="file_browser_unknown_error">Неизвестная ошибка</string>
+	<string name="file_browser_overwrite_confirmation_title">Подтвердите перезапись</string>
+	<string name="file_browser_overwrite_confirmation_dialog_content">Перезаписать %1$s?</string>
+	<string name="file_browser_storage_not_mounted">Хранилище не доступно</string>
+
+</resources>
